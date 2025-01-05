@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe - RSKWORLD</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      max-width: 400px;
+      margin: 20px auto;
+    }
+    .cell {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100px;
+      font-size: 3rem;
+      background-color: #f8f9fa;
+      border: 2px solid #6c757d;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background-color 0.3s;
+    }
+    .cell:hover {
+      background-color: #e2e6ea;
+    }
+    .cell.taken {
+      pointer-events: none;
+    }
+    .winner {
+      color: #28a745;
+    }
+    .loser {
+      color: #dc3545;
+    }
+    .draw {
+      color: #ffc107;
+    }
+    footer {
+      margin-top: 30px;
+      font-size: 0.9rem;
+    }
+    .footer-link {
+      text-decoration: none;
+      color: #007bff;
+    }
+    .footer-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body class="bg-light text-center">
+  <div class="container">
+    <h1 class="my-4">Tic Tac Toe - RSKWORLD</h1>
+    <div id="board" class="board"></div>
+    <div class="d-flex justify-content-center mt-4">
+      <button id="restart" class="btn btn-primary me-2">Restart</button>
+      <button id="mode" class="btn btn-secondary">Switch to AI Mode</button>
+    </div>
+    <p id="message" class="mt-4 fs-5 fw-bold"></p>
+    <footer class="text-muted mt-5">
+      Made with ❤️ by <a href="https://rskworld.in" target="_blank" class="footer-link">RSKWORLD</a>
+    </footer>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    const board = document.getElementById('board');
+    const restartButton = document.getElementById('restart');
+    const modeButton = document.getElementById('mode');
+    const message = document.getElementById('message');
+
+    let currentPlayer = 'X';
+    let gameMode = 'multiplayer'; // Modes: 'multiplayer' or 'ai'
+    let cells = ['', '', '', '', '', '', '', '', ''];
+    let isGameOver = false;
+
+    function renderBoard() {
+      board.innerHTML = '';
+      cells.forEach((cell, index) => {
+        const div = document.createElement('div');
+        div.classList.add('cell');
+        if (cell) div.classList.add('taken');
+        div.dataset.index = index;
+        div.innerHTML = cell === 'X' ? '<i class="fas fa-times text-primary"></i>' : 
+                        cell === 'O' ? '<i class="far fa-circle text-danger"></i>' : '';
+        div.addEventListener('click', handleCellClick);
+        board.appendChild(div);
+      });
+    }
+
+    function handleCellClick(e) {
+      const index = e.target.closest('.cell').dataset.index;
+      if (cells[index] || isGameOver) return;
+
+      cells[index] = currentPlayer;
+      renderBoard();
+
+      if (checkWin(currentPlayer)) {
+        message.innerHTML = `<span class="winner">${currentPlayer} wins!</span>`;
+        isGameOver = true;
+        return;
+      }
+
+      if (cells.every(cell => cell)) {
+        message.innerHTML = `<span class="draw">It's a draw!</span>`;
+        isGameOver = true;
+        return;
+      }
+
+      if (gameMode === 'ai' && currentPlayer === 'X') {
+        currentPlayer = 'O';
+        setTimeout(aiMove, 500);
+      } else {
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+      }
+    }
+
+    function aiMove() {
+      const emptyCells = cells.map((cell, index) => (cell ? null : index)).filter(index => index !== null);
+      const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      cells[randomIndex] = 'O';
+      renderBoard();
+
+      if (checkWin('O')) {
+        message.innerHTML = `<span class="loser">AI wins!</span>`;
+        isGameOver = true;
+        return;
+      }
+
+      if (cells.every(cell => cell)) {
+        message.innerHTML = `<span class="draw">It's a draw!</span>`;
+        isGameOver = true;
+        return;
+      }
+
+      currentPlayer = 'X';
+    }
+
+    function checkWin(player) {
+      const winPatterns = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ];
+      return winPatterns.some(pattern => pattern.every(index => cells[index] === player));
+    }
+
+    restartButton.addEventListener('click', () => {
+      cells = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'X';
+      isGameOver = false;
+      message.textContent = '';
+      renderBoard();
+    });
+
+    modeButton.addEventListener('click', () => {
+      gameMode = gameMode === 'multiplayer' ? 'ai' : 'multiplayer';
+      modeButton.textContent = gameMode === 'multiplayer' ? 'Switch to AI Mode' : 'Switch to Multiplayer Mode';
+      restartButton.click();
+    });
+
+    renderBoard();
+  </script>
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
