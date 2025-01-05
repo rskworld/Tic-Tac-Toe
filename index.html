@@ -8,6 +8,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <!-- Animate.css -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
   <!-- Custom Styles -->
   <style>
     body {
@@ -25,12 +27,16 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+    .board-container {
+      position: relative;
+    }
     .board {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
       max-width: 400px;
       margin: 20px auto;
+      position: relative;
     }
     .cell {
       display: flex;
@@ -51,18 +57,17 @@
     .cell.taken {
       pointer-events: none;
     }
-    .cell i {
-      animation: fadeIn 0.3s ease-in-out;
+    .line {
+      position: absolute;
+      background-color: #28a745;
+      height: 6px;
+      width: 0;
+      transform-origin: left;
+      transition: width 0.5s ease-in-out;
     }
     .winner {
       animation: bounce 1s infinite;
       color: #28a745;
-    }
-    .loser {
-      color: #dc3545;
-    }
-    .draw {
-      color: #ffc107;
     }
     footer {
       margin-top: 30px;
@@ -76,38 +81,20 @@
     .footer-link:hover {
       text-decoration: underline;
     }
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-        transform: scale(0.5);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-    }
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
-      }
-      40% {
-        transform: translateY(-10px);
-      }
-      60% {
-        transform: translateY(-5px);
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container text-center">
-    <h1 class="my-4">Tic Tac Toe - RSKWORLD</h1>
-    <div id="board" class="board"></div>
+    <h1 class="my-4 animate__animated animate__fadeInDown">Tic Tac Toe - RSKWORLD</h1>
+    <div class="board-container">
+      <div id="line" class="line"></div>
+      <div id="board" class="board animate__animated animate__fadeIn"></div>
+    </div>
     <div class="d-flex justify-content-center mt-4">
       <button id="restart" class="btn btn-primary me-2">Restart</button>
       <button id="mode" class="btn btn-secondary">Switch to AI Mode</button>
     </div>
-    <p id="message" class="mt-4 fs-5 fw-bold"></p>
+    <p id="message" class="mt-4 fs-5 fw-bold animate__animated"></p>
     <footer class="text-center mt-5">
       Made with ❤️ by <a href="https://rskworld.in" target="_blank" class="footer-link">RSKWORLD</a>
     </footer>
@@ -116,6 +103,7 @@
   <!-- JavaScript -->
   <script>
     const board = document.getElementById('board');
+    const line = document.getElementById('line');
     const restartButton = document.getElementById('restart');
     const modeButton = document.getElementById('mode');
     const message = document.getElementById('message');
@@ -129,7 +117,7 @@
       board.innerHTML = '';
       cells.forEach((cell, index) => {
         const div = document.createElement('div');
-        div.classList.add('cell');
+        div.classList.add('cell', 'animate__animated', 'animate__zoomIn');
         if (cell) div.classList.add('taken');
         div.dataset.index = index;
         div.innerHTML = cell === 'X' ? '<i class="fas fa-times text-primary"></i>' : 
@@ -146,15 +134,16 @@
       cells[index] = currentPlayer;
       renderBoard();
 
-      if (checkWin(currentPlayer)) {
-        message.innerHTML = `<span class="winner">${currentPlayer} wins!</span>`;
-        highlightWinner();
+      const winPattern = checkWin(currentPlayer);
+      if (winPattern) {
+        message.innerHTML = `<span class="winner animate__animated animate__rubberBand">${currentPlayer} wins!</span>`;
+        drawLine(winPattern);
         isGameOver = true;
         return;
       }
 
       if (cells.every(cell => cell)) {
-        message.innerHTML = `<span class="draw">It's a draw!</span>`;
+        message.innerHTML = `<span class="draw animate__animated animate__shakeX">It's a draw!</span>`;
         isGameOver = true;
         return;
       }
@@ -173,15 +162,16 @@
       cells[randomIndex] = 'O';
       renderBoard();
 
-      if (checkWin('O')) {
-        message.innerHTML = `<span class="loser">AI wins!</span>`;
-        highlightWinner();
+      const winPattern = checkWin('O');
+      if (winPattern) {
+        message.innerHTML = `<span class="loser animate__animated animate__wobble">AI wins!</span>`;
+        drawLine(winPattern);
         isGameOver = true;
         return;
       }
 
       if (cells.every(cell => cell)) {
-        message.innerHTML = `<span class="draw">It's a draw!</span>`;
+        message.innerHTML = `<span class="draw animate__animated animate__shakeX">It's a draw!</span>`;
         isGameOver = true;
         return;
       }
@@ -200,29 +190,27 @@
         [0, 4, 8],
         [2, 4, 6]
       ];
-      return winPatterns.some(pattern => pattern.every(index => cells[index] === player));
+      return winPatterns.find(pattern => pattern.every(index => cells[index] === player)) || null;
     }
 
-    function highlightWinner() {
-      const winPatterns = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6]
-      ];
+    function drawLine(pattern) {
+      const startCell = document.querySelector(`.cell[data-index="${pattern[0]}"]`);
+      const endCell = document.querySelector(`.cell[data-index="${pattern[2]}"]`);
+      const rectStart = startCell.getBoundingClientRect();
+      const rectEnd = endCell.getBoundingClientRect();
 
-      winPatterns.forEach(pattern => {
-        if (pattern.every(index => cells[index] === currentPlayer)) {
-          pattern.forEach(index => {
-            const cell = document.querySelector(`.cell[data-index='${index}']`);
-            cell.style.backgroundColor = '#28a745';
-          });
-        }
-      });
+      const x1 = rectStart.left + rectStart.width / 2;
+      const y1 = rectStart.top + rectStart.height / 2;
+      const x2 = rectEnd.left + rectEnd.width / 2;
+      const y2 = rectEnd.top + rectEnd.height / 2;
+
+      const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
+      const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+
+      line.style.width = `${distance}px`;
+      line.style.transform = `rotate(${angle}deg)`;
+      line.style.left = `${x1}px`;
+      line.style.top = `${y1 - 3}px`;
     }
 
     restartButton.addEventListener('click', () => {
@@ -230,6 +218,7 @@
       currentPlayer = 'X';
       isGameOver = false;
       message.textContent = '';
+      line.style.width = '0';
       renderBoard();
     });
 
