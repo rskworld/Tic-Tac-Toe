@@ -64,6 +64,7 @@
       width: 0;
       transform-origin: left;
       transition: width 0.5s ease-in-out;
+      z-index: 10;
     }
     .winner {
       animation: bounce 1s infinite;
@@ -199,22 +200,27 @@
     function drawLine(pattern) {
       const startCell = $('.cell').eq(pattern[0]);
       const endCell = $('.cell').eq(pattern[2]);
+
+      // Get the position of the first and last cells in the winning pattern
       const rectStart = startCell[0].getBoundingClientRect();
       const rectEnd = endCell[0].getBoundingClientRect();
 
+      // Get the center coordinates of the start and end cells
       const x1 = rectStart.left + rectStart.width / 2;
       const y1 = rectStart.top + rectStart.height / 2;
       const x2 = rectEnd.left + rectEnd.width / 2;
       const y2 = rectEnd.top + rectEnd.height / 2;
 
+      // Calculate the angle of rotation and the distance between the two points
       const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
       const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 
+      // Position and rotate the line to span from the start cell to the end cell
       line.css({
         width: `${distance}px`,
         transform: `rotate(${angle}deg)`,
         left: `${x1}px`,
-        top: `${y1 - 3}px`
+        top: `${y1 - 3}px` // Adjust for line thickness
       });
     }
 
