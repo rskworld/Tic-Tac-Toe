@@ -8,9 +8,22 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <!-- Custom Styles -->
   <style>
     body {
       font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #6c757d, #f8f9fa);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #007bff, #6610f2);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .board {
       display: grid;
@@ -29,15 +42,20 @@
       border: 2px solid #6c757d;
       cursor: pointer;
       border-radius: 10px;
-      transition: background-color 0.3s;
+      transition: transform 0.3s, background-color 0.3s;
     }
     .cell:hover {
-      background-color: #e2e6ea;
+      background-color: #007bff;
+      transform: scale(1.1);
     }
     .cell.taken {
       pointer-events: none;
     }
+    .cell i {
+      animation: fadeIn 0.3s ease-in-out;
+    }
     .winner {
+      animation: bounce 1s infinite;
       color: #28a745;
     }
     .loser {
@@ -49,18 +67,40 @@
     footer {
       margin-top: 30px;
       font-size: 0.9rem;
+      color: #f8f9fa;
     }
     .footer-link {
       text-decoration: none;
-      color: #007bff;
+      color: #ffc107;
     }
     .footer-link:hover {
       text-decoration: underline;
     }
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
   </style>
 </head>
-<body class="bg-light text-center">
-  <div class="container">
+<body>
+  <div class="container text-center">
     <h1 class="my-4">Tic Tac Toe - RSKWORLD</h1>
     <div id="board" class="board"></div>
     <div class="d-flex justify-content-center mt-4">
@@ -68,7 +108,7 @@
       <button id="mode" class="btn btn-secondary">Switch to AI Mode</button>
     </div>
     <p id="message" class="mt-4 fs-5 fw-bold"></p>
-    <footer class="text-muted mt-5">
+    <footer class="text-center mt-5">
       Made with ❤️ by <a href="https://rskworld.in" target="_blank" class="footer-link">RSKWORLD</a>
     </footer>
   </div>
@@ -108,6 +148,7 @@
 
       if (checkWin(currentPlayer)) {
         message.innerHTML = `<span class="winner">${currentPlayer} wins!</span>`;
+        highlightWinner();
         isGameOver = true;
         return;
       }
@@ -134,6 +175,7 @@
 
       if (checkWin('O')) {
         message.innerHTML = `<span class="loser">AI wins!</span>`;
+        highlightWinner();
         isGameOver = true;
         return;
       }
@@ -159,6 +201,28 @@
         [2, 4, 6]
       ];
       return winPatterns.some(pattern => pattern.every(index => cells[index] === player));
+    }
+
+    function highlightWinner() {
+      const winPatterns = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+      ];
+
+      winPatterns.forEach(pattern => {
+        if (pattern.every(index => cells[index] === currentPlayer)) {
+          pattern.forEach(index => {
+            const cell = document.querySelector(`.cell[data-index='${index}']`);
+            cell.style.backgroundColor = '#28a745';
+          });
+        }
+      });
     }
 
     restartButton.addEventListener('click', () => {
