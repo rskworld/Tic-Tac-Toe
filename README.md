@@ -20,7 +20,7 @@ Hosted at: [RSKWORLD Tic Tac Toe](http://rskworld.in/games/html5-games/tictactoe
 ## Screenshots 📸
 
 ### Main Screen
-![Tic Tac Toe Main Screen](https://via.placeholder.com/800x400.png?text=Tic+Tac+Toe+-+RSKWORLD)
+![Tic Tac Toe Main Screen](http://localhost/games/html5-games/tictactoe/tictactoe.png)
 
 ---
 
