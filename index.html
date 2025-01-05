@@ -53,14 +53,9 @@
     .cell.taken {
       pointer-events: none;
     }
-    .line {
-      position: absolute;
-      background-color: #28a745;
-      height: 6px;
-      width: 0;
-      transform-origin: left;
-      transition: width 0.5s ease-in-out;
-      z-index: 10;
+    .winning-cell {
+      background-color: #28a745 !important;
+      animation: pulse 1s ease-out infinite;
     }
     .winner {
       animation: bounce 1s infinite;
@@ -78,13 +73,23 @@
     .footer-link:hover {
       text-decoration: underline;
     }
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container text-center">
     <h1 class="my-4 animate__animated animate__fadeInDown">Tic Tac Toe - RSKWORLD</h1>
     <div class="board-container">
-      <div id="line" class="line"></div>
       <div id="board" class="board animate__animated animate__fadeIn"></div>
     </div>
     <div class="d-flex justify-content-center mt-4">
@@ -102,7 +107,6 @@
 
   <script>
     const board = $('#board');
-    const line = $('#line');
     const restartButton = $('#restart');
     const modeButton = $('#mode');
     const message = $('#message');
@@ -134,7 +138,7 @@
       const winPattern = checkWin(currentPlayer);
       if (winPattern) {
         message.html(`<span class="winner animate__animated animate__rubberBand">${currentPlayer} wins!</span>`);
-        drawLine(winPattern);
+        highlightWinningCells(winPattern);
         isGameOver = true;
         return;
       }
@@ -162,7 +166,7 @@
       const winPattern = checkWin('O');
       if (winPattern) {
         message.html(`<span class="loser animate__animated animate__wobble">AI wins!</span>`);
-        drawLine(winPattern);
+        highlightWinningCells(winPattern);
         isGameOver = true;
         return;
       }
@@ -190,30 +194,10 @@
       return winPatterns.find(pattern => pattern.every(index => cells[index] === player)) || null;
     }
 
-    function drawLine(pattern) {
-      const startCell = $('.cell').eq(pattern[0]);
-      const endCell = $('.cell').eq(pattern[2]);
-
-      // Get the position of the first and last cells in the winning pattern
-      const rectStart = startCell[0].getBoundingClientRect();
-      const rectEnd = endCell[0].getBoundingClientRect();
-
-      // Get the center coordinates of the start and end cells
-      const x1 = rectStart.left + rectStart.width / 2;
-      const y1 = rectStart.top + rectStart.height / 2;
-      const x2 = rectEnd.left + rectEnd.width / 2;
-      const y2 = rectEnd.top + rectEnd.height / 2;
-
-      // Calculate the angle of rotation and the distance between the two points
-      const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
-      const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-
-      // Position and rotate the line to span from the start cell to the end cell
-      line.css({
-        width: `${distance}px`,
-        transform: `rotate(${angle}deg)`,
-        left: `${x1}px`,
-        top: `${y1 - 3}px` // Adjust for line thickness
+    function highlightWinningCells(pattern) {
+      pattern.forEach(index => {
+        const cell = $('.cell').eq(index);
+        cell.addClass('winning-cell');
       });
     }
 
@@ -222,7 +206,6 @@
       currentPlayer = 'X';
       isGameOver = false;
       message.text('');
-      line.css('width', '0');
       renderBoard();
     });
 
