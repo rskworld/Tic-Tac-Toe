@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic Tac Toe - RSKWORLD</title>
+  <title>Tic Tac Toe - RSKWORLD 🎮</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
@@ -100,13 +100,18 @@
     </footer>
   </div>
 
-  <!-- JavaScript -->
+  <!-- jQuery -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
   <script>
-    const board = document.getElementById('board');
-    const line = document.getElementById('line');
-    const restartButton = document.getElementById('restart');
-    const modeButton = document.getElementById('mode');
-    const message = document.getElementById('message');
+    const board = $('#board');
+    const line = $('#line');
+    const restartButton = $('#restart');
+    const modeButton = $('#mode');
+    const message = $('#message');
 
     let currentPlayer = 'X';
     let gameMode = 'multiplayer'; // Modes: 'multiplayer' or 'ai'
@@ -114,21 +119,19 @@
     let isGameOver = false;
 
     function renderBoard() {
-      board.innerHTML = '';
+      board.empty();
       cells.forEach((cell, index) => {
-        const div = document.createElement('div');
-        div.classList.add('cell', 'animate__animated', 'animate__zoomIn');
-        if (cell) div.classList.add('taken');
-        div.dataset.index = index;
-        div.innerHTML = cell === 'X' ? '<i class="fas fa-times text-primary"></i>' : 
-                        cell === 'O' ? '<i class="far fa-circle text-danger"></i>' : '';
-        div.addEventListener('click', handleCellClick);
-        board.appendChild(div);
+        const div = $('<div>').addClass('cell').data('index', index);
+        if (cell) div.addClass('taken');
+        div.html(cell === 'X' ? '<i class="fas fa-times text-primary"></i>' : 
+                                cell === 'O' ? '<i class="far fa-circle text-danger"></i>' : '');
+        div.on('click', handleCellClick);
+        board.append(div);
       });
     }
 
-    function handleCellClick(e) {
-      const index = e.target.closest('.cell').dataset.index;
+    function handleCellClick() {
+      const index = $(this).data('index');
       if (cells[index] || isGameOver) return;
 
       cells[index] = currentPlayer;
@@ -136,14 +139,14 @@
 
       const winPattern = checkWin(currentPlayer);
       if (winPattern) {
-        message.innerHTML = `<span class="winner animate__animated animate__rubberBand">${currentPlayer} wins!</span>`;
+        message.html(`<span class="winner animate__animated animate__rubberBand">${currentPlayer} wins!</span>`);
         drawLine(winPattern);
         isGameOver = true;
         return;
       }
 
       if (cells.every(cell => cell)) {
-        message.innerHTML = `<span class="draw animate__animated animate__shakeX">It's a draw!</span>`;
+        message.html(`<span class="draw animate__animated animate__shakeX">It's a draw!</span>`);
         isGameOver = true;
         return;
       }
@@ -164,14 +167,14 @@
 
       const winPattern = checkWin('O');
       if (winPattern) {
-        message.innerHTML = `<span class="loser animate__animated animate__wobble">AI wins!</span>`;
+        message.html(`<span class="loser animate__animated animate__wobble">AI wins!</span>`);
         drawLine(winPattern);
         isGameOver = true;
         return;
       }
 
       if (cells.every(cell => cell)) {
-        message.innerHTML = `<span class="draw animate__animated animate__shakeX">It's a draw!</span>`;
+        message.html(`<span class="draw animate__animated animate__shakeX">It's a draw!</span>`);
         isGameOver = true;
         return;
       }
@@ -194,10 +197,10 @@
     }
 
     function drawLine(pattern) {
-      const startCell = document.querySelector(`.cell[data-index="${pattern[0]}"]`);
-      const endCell = document.querySelector(`.cell[data-index="${pattern[2]}"]`);
-      const rectStart = startCell.getBoundingClientRect();
-      const rectEnd = endCell.getBoundingClientRect();
+      const startCell = $('.cell').eq(pattern[0]);
+      const endCell = $('.cell').eq(pattern[2]);
+      const rectStart = startCell[0].getBoundingClientRect();
+      const rectEnd = endCell[0].getBoundingClientRect();
 
       const x1 = rectStart.left + rectStart.width / 2;
       const y1 = rectStart.top + rectStart.height / 2;
@@ -207,30 +210,30 @@
       const angle = Math.atan2(y2 - y1, x2 - x1) * (180 / Math.PI);
       const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 
-      line.style.width = `${distance}px`;
-      line.style.transform = `rotate(${angle}deg)`;
-      line.style.left = `${x1}px`;
-      line.style.top = `${y1 - 3}px`;
+      line.css({
+        width: `${distance}px`,
+        transform: `rotate(${angle}deg)`,
+        left: `${x1}px`,
+        top: `${y1 - 3}px`
+      });
     }
 
-    restartButton.addEventListener('click', () => {
+    restartButton.on('click', () => {
       cells = ['', '', '', '', '', '', '', '', ''];
       currentPlayer = 'X';
       isGameOver = false;
-      message.textContent = '';
-      line.style.width = '0';
+      message.text('');
+      line.css('width', '0');
       renderBoard();
     });
 
-    modeButton.addEventListener('click', () => {
+    modeButton.on('click', () => {
       gameMode = gameMode === 'multiplayer' ? 'ai' : 'multiplayer';
-      modeButton.textContent = gameMode === 'multiplayer' ? 'Switch to AI Mode' : 'Switch to Multiplayer Mode';
+      modeButton.text(gameMode === 'multiplayer' ? 'Switch to AI Mode' : 'Switch to Multiplayer Mode');
       restartButton.click();
     });
 
     renderBoard();
   </script>
-  <!-- Bootstrap Bundle with Popper -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
